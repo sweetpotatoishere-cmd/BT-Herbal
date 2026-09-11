@@ -853,11 +853,13 @@
     }
 
     async function loadSiteData() {
-        // First try the static JSON file used by Netlify/GitHub Pages.
+        // Load the static JSON in the background. The page itself is rendered
+        // immediately from defaultData, so visitors never stare at a blank
+        // background while the 4+ MB image data is being downloaded.
         try {
-            var response = await fetch('./data.json?v=' + Date.now(), {
+            var response = await fetch('./data.json', {
                 method: 'GET',
-                cache: 'no-store',
+                cache: 'no-cache',
                 credentials: 'same-origin'
             });
             if (response.ok) {
@@ -1067,12 +1069,26 @@
         showToast('Logged out');
     }
 
-    document.addEventListener('DOMContentLoaded', async function() {
-        // Wait for data.json before rendering anything so deployed updates/images
-        // are present on the first paint.
-        siteData = await loadSiteData();
+    document.addEventListener('DOMContentLoaded', function() {
+        // IMPORTANT: render immediately from the built-in defaults.
+        // data.json contains several MB of Base64 images, so waiting for it
+        // here caused the old version to show only the background for a while.
+        // We load the deployed data in the background and refresh the content
+        // when it arrives.
+        siteData = JSON.parse(JSON.stringify(defaultData));
         renderSite();
         updateCart();
+
+        loadSiteData().then(function(loadedData) {
+            if (loadedData) {
+                siteData = loadedData;
+                renderSite();
+                updateCart();
+                console.info('[B&T Herbal] Live data applied after initial render.');
+            }
+        }).catch(function(err) {
+            console.warn('[B&T Herbal] Background data load failed:', err);
+        });
 
         window.addEventListener('scroll', function() {
             document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
