@@ -808,7 +808,9 @@
         contact: { phone: "+92 305 5882707", email: "baqirrazajafferi@gmail.com", location: "Bakra Mandi, Rawalpindi, Pakistan", facebook: "", instagram: "https://www.instagram.com/b_and_t_herbal_shampoo", whatsapp: "923055882707", footerText: "© 2026 B&T Herbal Care. All Rights Reserved." }
     };
 
-    var siteData = loadSiteData();
+    // Start with safe defaults. The live JSON is loaded after DOM is ready.
+    // Do NOT call the async loader here, because that would make siteData a Promise.
+    var siteData = JSON.parse(JSON.stringify(defaultData));
     var cart = [];
     var footerClickCount = 0;
     var footerClickTimer = null;
