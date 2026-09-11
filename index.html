@@ -813,20 +813,71 @@
     var footerClickCount = 0;
     var footerClickTimer = null;
 
-    function loadSiteData() {
+    /*
+     * DATA LOADER
+     * ------------------------------------------------------------
+     * The live website reads /data.json automatically.
+     * Keep index.html and data.json in the same Netlify/GitHub root.
+     *
+     * Priority:
+     *   1) data.json  -> live/deployed content and images
+     *   2) localStorage -> fallback for local/admin use
+     *   3) defaultData -> final fallback
+     *
+     * Images saved by the Admin Panel as Base64 are therefore carried
+     * inside data.json and do not depend on a separate image folder.
+     */
+    function mergeSiteData(parsed) {
+        parsed = parsed || {};
+        if (parsed.hero && !parsed.hero.imgBase64 && parsed.hero.heroImgBase64) {
+            parsed.hero.imgBase64 = parsed.hero.heroImgBase64;
+        }
+        return {
+            hero: Object.assign({}, defaultData.hero, parsed.hero || {}),
+            products: Object.assign({}, defaultData.products, parsed.products || {}, {
+                items: (parsed.products && Array.isArray(parsed.products.items) && parsed.products.items.length)
+                    ? parsed.products.items : defaultData.products.items
+            }),
+            ingredients: Object.assign({}, defaultData.ingredients, parsed.ingredients || {}, {
+                items: (parsed.ingredients && Array.isArray(parsed.ingredients.items) && parsed.ingredients.items.length)
+                    ? parsed.ingredients.items : defaultData.ingredients.items
+            }),
+            benefits: Object.assign({}, defaultData.benefits, parsed.benefits || {}, {
+                items: (parsed.benefits && Array.isArray(parsed.benefits.items) && parsed.benefits.items.length)
+                    ? parsed.benefits.items : defaultData.benefits.items
+            }),
+            contact: Object.assign({}, defaultData.contact, parsed.contact || {})
+        };
+    }
+
+    async function loadSiteData() {
+        // First try the static JSON file used by Netlify/GitHub Pages.
+        try {
+            var response = await fetch('./data.json?v=' + Date.now(), {
+                method: 'GET',
+                cache: 'no-store',
+                credentials: 'same-origin'
+            });
+            if (response.ok) {
+                var parsed = await response.json();
+                console.info('[B&T Herbal] Loaded website data from data.json');
+                return mergeSiteData(parsed);
+            }
+        } catch (err) {
+            console.warn('[B&T Herbal] data.json could not be loaded. Using local fallback.', err);
+        }
+
+        // Fallback for local/admin use if data.json is unavailable.
         try {
             var saved = localStorage.getItem('btSiteData');
             if (saved) {
-                var parsed = JSON.parse(saved);
-                return {
-                    hero: Object.assign({}, defaultData.hero, parsed.hero || {}),
-                    products: Object.assign({}, defaultData.products, parsed.products || {}, { items: (parsed.products && Array.isArray(parsed.products.items) && parsed.products.items.length) ? parsed.products.items : defaultData.products.items }),
-                    ingredients: Object.assign({}, defaultData.ingredients, parsed.ingredients || {}, { items: (parsed.ingredients && Array.isArray(parsed.ingredients.items) && parsed.ingredients.items.length) ? parsed.ingredients.items : defaultData.ingredients.items }),
-                    benefits: Object.assign({}, defaultData.benefits, parsed.benefits || {}, { items: (parsed.benefits && Array.isArray(parsed.benefits.items) && parsed.benefits.items.length) ? parsed.benefits.items : defaultData.benefits.items }),
-                    contact: Object.assign({}, defaultData.contact, parsed.contact || {})
-                };
+                console.info('[B&T Herbal] Loaded website data from localStorage');
+                return mergeSiteData(JSON.parse(saved));
             }
-        } catch (err) { console.warn('Load error:', err); }
+        } catch (err) {
+            console.warn('[B&T Herbal] localStorage load error:', err);
+        }
+
         return JSON.parse(JSON.stringify(defaultData));
     }
 
@@ -1014,7 +1065,10 @@
         showToast('Logged out');
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Wait for data.json before rendering anything so deployed updates/images
+        // are present on the first paint.
+        siteData = await loadSiteData();
         renderSite();
         updateCart();
 
