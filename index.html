@@ -857,9 +857,9 @@
         // immediately from defaultData, so visitors never stare at a blank
         // background while the 4+ MB image data is being downloaded.
         try {
-            var response = await fetch('./data.json', {
+            var response = await fetch('./data.json?v=' + Date.now(), {
                 method: 'GET',
-                cache: 'no-cache',
+                cache: 'no-store',
                 credentials: 'same-origin'
             });
             if (response.ok) {
@@ -1849,7 +1849,7 @@
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
             a.href = url;
-            a.download = 'bt_herbal_data.json';
+            a.download = 'data.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
