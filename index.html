@@ -552,6 +552,21 @@
         @media(max-width:1050px){.admin-sidebar{width:220px;flex-basis:220px}.admin-stats{grid-template-columns:repeat(2,1fr)}.admin-product-grid{grid-template-columns:1fr}}
         @media(max-width:760px){.admin-dashboard-shell{display:block}.admin-sidebar{position:relative;width:auto;height:auto;padding:12px}.admin-nav{grid-template-columns:repeat(2,1fr)}.admin-main{padding:0 14px 30px}.admin-form-grid-modern{grid-template-columns:1fr}.admin-stats{grid-template-columns:1fr 1fr}.admin-quick{grid-template-columns:1fr}.admin-top-actions .admin-status-pill{display:none}}
     </style>
+
+<style id="bt-performance-mobile">
+/* Performance: keep the first screen usable while large admin images load. */
+img { content-visibility: auto; }
+.product-card img, .benefit-card img, .ingredient-card img {
+  loading: lazy;
+  decoding: async;
+}
+@media (max-width: 768px) {
+  html { scroll-behavior: smooth; }
+  img { max-width: 100%; height: auto; }
+  .container { width: min(100% - 28px, 1200px); }
+}
+</style>
+
 </head>
 <body>
 
@@ -597,7 +612,7 @@
                 <div class="hero-arch-frame">
                     <div class="hero-arch-glow"></div>
                     <div class="hero-arch">
-                        <img src="product-bottle.png" alt="B&T Herbal shampoo bottle" id="heroImg" onerror="handleImgError(this)">
+                        <img loading="lazy" decoding="async" src="product-bottle.png" alt="B&T Herbal shampoo bottle" id="heroImg" onerror="handleImgError(this)">
                     </div>
                 </div>
             </div>
@@ -955,7 +970,7 @@
             var scale = p.imageScale || 100;
             return '<div class="product-card">' +
                 '<div class="product-image">' + (p.badge ? '<span class="product-badge">' + p.badge + '</span>' : '') +
-                '<img src="' + (p.image || 'product-bottle.png') + '" alt="' + p.name + '" onerror="handleImgError(this)" style="transform:scale(' + (scale/100) + ');transform-origin:center;"></div>' +
+                '<img loading="lazy" decoding="async" src="' + (p.image || 'product-bottle.png') + '" alt="' + p.name + '" onerror="handleImgError(this)" style="transform:scale(' + (scale/100) + ');transform-origin:center;"></div>' +
                 '<div class="product-info">' +
                 '<div class="product-category">' + (p.category === 'signature' ? 'SIGNATURE PRODUCT' : String(p.category || 'product').toUpperCase()) + '</div>' +
                 '<h3 class="product-name">' + p.name + '</h3>' +
@@ -976,7 +991,7 @@
             var icon = iconMap[b.icon] || 'fa-leaf';
             return '<div class="timeline-item reveal">' +
                 '<div class="timeline-card"><div class="timeline-card-header"><div class="timeline-avatar">' +
-                (b.image ? '<img src="' + b.image + '" alt="' + b.title + '">' : '<i class="fas ' + icon + '"></i>') +
+                (b.image ? '<img loading="lazy" decoding="async" src="' + b.image + '" alt="' + b.title + '">' : '<i class="fas ' + icon + '"></i>') +
                 '</div><div><div class="timeline-card-title">' + b.title + '</div><div class="timeline-card-date">' + b.date + '</div></div></div>' +
                 '<p>' + b.text + '</p></div><div class="timeline-dot"></div></div>';
         }).join('');
@@ -994,7 +1009,7 @@
         grid.innerHTML = items.map(function(ing) {
             return '<div class="ingredient-card reveal">' +
                 '<div class="ingredient-icon">' +
-                (ing.image ? '<img src="' + ing.image + '" alt="' + ing.name + '" onerror="handleImgError(this)">' : '<i class="fas fa-seedling"></i>') +
+                (ing.image ? '<img loading="lazy" decoding="async" src="' + ing.image + '" alt="' + ing.name + '" onerror="handleImgError(this)">' : '<i class="fas fa-seedling"></i>') +
                 '</div>' +
                 '<div class="ingredient-name">' + ing.name + '</div>' +
                 '<div class="ingredient-desc">' + (ing.desc || '') + '</div>' +
@@ -1026,7 +1041,7 @@
             cartItems.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-light);"><i class="fas fa-shopping-bag" style="font-size:2rem;opacity:0.3;"></i><p>Your cart is empty</p></div>';
         } else {
             cartItems.innerHTML = cart.map(function(item) {
-                return '<div class="cart-item"><div class="cart-item-img"><img src="' + item.image + '" alt="' + item.name + '" onerror="handleImgError(this)"></div><div class="cart-item-details"><div class="cart-item-name">' + item.name + '</div><div class="cart-item-price">Rs ' + (item.price * item.qty).toLocaleString() + ' (' + item.qty + 'x)</div></div><button class="cart-item-remove" onclick="removeFromCart(' + item.id + ')"><i class="fas fa-trash"></i></button></div>';
+                return '<div class="cart-item"><div class="cart-item-img"><img loading="lazy" decoding="async" src="' + item.image + '" alt="' + item.name + '" onerror="handleImgError(this)"></div><div class="cart-item-details"><div class="cart-item-name">' + item.name + '</div><div class="cart-item-price">Rs ' + (item.price * item.qty).toLocaleString() + ' (' + item.qty + 'x)</div></div><button class="cart-item-remove" onclick="removeFromCart(' + item.id + ')"><i class="fas fa-trash"></i></button></div>';
             }).join('');
         }
     }
@@ -1310,7 +1325,7 @@
                                 '<div class="admin-field-modern"><label>Hero Title</label><input id="modernHeroTitle"></div>' +
                                 '<div class="admin-field-modern"><label>Subtitle</label><input id="modernHeroSubtitle"></div>' +
                                 '<div class="admin-field-modern full"><label>Description</label><textarea id="modernHeroDesc"></textarea></div>' +
-                                '<div class="admin-field-modern"><label>Hero Image Upload</label><input type="file" id="modernHeroFile" accept="image/*"><img id="modernHeroPreview" class="admin-image-preview-modern"></div>' +
+                                '<div class="admin-field-modern"><label>Hero Image Upload</label><input type="file" id="modernHeroFile" accept="image/*"><img loading="lazy" decoding="async" id="modernHeroPreview" class="admin-image-preview-modern"></div>' +
                                 '<div class="admin-field-modern"><label>Image Path / URL</label><input id="modernHeroImagePath"></div>' +
                                 '<div class="admin-field-modern"><label>Stat 1</label><input id="modernStat1"></div>' +
                                 '<div class="admin-field-modern"><label>Stat 1 Label</label><input id="modernStat1Label"></div>' +
@@ -1497,7 +1512,7 @@
                 var scale = p.imageScale || 100;
                 var imgValue = (p.image && p.image.indexOf('data:') === 0) ? '' : (p.image || '');
                 return '<div class="modern-product-card" data-mid="' + p.id + '">' +
-                    '<div class="modern-product-media"><img class="mp-preview" src="' + safe(p.image || 'product-bottle.png') + '" alt="' + safe(p.name) + '" onerror="this.onerror=null;this.src=\'product-bottle.png\';" style="transform:scale(' + (scale/100) + ');transform-origin:center;">' + (p.badge ? '<span class="badge">' + safe(p.badge) + '</span>' : '') + '</div>' +
+                    '<div class="modern-product-media"><img loading="lazy" decoding="async" class="mp-preview" src="' + safe(p.image || 'product-bottle.png') + '" alt="' + safe(p.name) + '" onerror="this.onerror=null;this.src=\'product-bottle.png\';" style="transform:scale(' + (scale/100) + ');transform-origin:center;">' + (p.badge ? '<span class="badge">' + safe(p.badge) + '</span>' : '') + '</div>' +
                     '<div class="modern-product-body">' +
                         '<div class="cat">' + safe(p.category || 'product') + '</div>' +
                         '<h3>' + safe(p.name) + '</h3>' +
@@ -1661,7 +1676,7 @@
                         '<div class="admin-field-modern full"><label>Image (optional)</label>' +
                             '<input type="file" class="b-file" data-idx="' + i + '" accept="image/*">' +
                             '<input class="b-image-path" value="' + safe(imgValue) + '" placeholder="Leave empty to keep current image" style="margin-top:6px">' +
-                            (b.image ? '<img src="' + safe(b.image) + '" style="max-width:60px;max-height:60px;border-radius:8px;margin-top:8px;object-fit:cover" onerror="this.style.display=\'none\'">' : '') +
+                            (b.image ? '<img loading="lazy" decoding="async" src="' + safe(b.image) + '" style="max-width:60px;max-height:60px;border-radius:8px;margin-top:8px;object-fit:cover" onerror="this.style.display=\'none\'">' : '') +
                             '<div style="margin-top:8px"><button type="button" class="admin-modern-btn danger b-remove-img" data-idx="' + i + '">Remove Image</button></div>' +
                         '</div>' +
                     '</div>' +
@@ -1741,7 +1756,7 @@
                         '<div class="admin-field-modern full"><label>Image (optional)</label>' +
                             '<input type="file" class="ing-file" data-ingid="' + ing.id + '" accept="image/*">' +
                             '<input class="ing-image-path" value="' + safe(imgValue) + '" placeholder="Leave empty to keep current image" style="margin-top:6px">' +
-                            (ing.image ? '<img src="' + safe(ing.image) + '" style="max-width:60px;max-height:60px;border-radius:50%;margin-top:8px;object-fit:cover" onerror="this.style.display=\'none\'">' : '') +
+                            (ing.image ? '<img loading="lazy" decoding="async" src="' + safe(ing.image) + '" style="max-width:60px;max-height:60px;border-radius:50%;margin-top:8px;object-fit:cover" onerror="this.style.display=\'none\'">' : '') +
                             '<div style="margin-top:8px"><button type="button" class="admin-modern-btn danger ing-remove-img" data-ingid="' + ing.id + '">Remove Image</button></div>' +
                         '</div>' +
                     '</div>' +
@@ -1909,7 +1924,7 @@
             var mini = document.getElementById('orderProductMini');
             if (items.length === 1) {
                 var it = items[0];
-                mini.innerHTML = '<img src="' + esc(it.image || 'product-bottle.png') + '" alt="" onerror="handleImgError(this)">' +
+                mini.innerHTML = '<img loading="lazy" decoding="async" src="' + esc(it.image || 'product-bottle.png') + '" alt="" onerror="handleImgError(this)">' +
                     '<div class="opm-info"><div class="opm-name">' + esc(it.name) + '</div>' +
                     '<div class="opm-price">Rs ' + Number(it.price).toLocaleString() + '</div></div>';
             } else {
