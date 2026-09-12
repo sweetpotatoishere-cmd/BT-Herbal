@@ -1085,12 +1085,19 @@ img { content-visibility: auto; }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // IMPORTANT: render immediately from the built-in defaults.
-        // data.json contains several MB of Base64 images, so waiting for it
-        // here caused the old version to show only the background for a while.
-        // We load the deployed data in the background and refresh the content
-        // when it arrives.
-        siteData = JSON.parse(JSON.stringify(defaultData));
+        // IMPORTANT: render immediately so visitors never see a blank page.
+        // We prefer the last known LIVE data (cached in localStorage from a
+        // previous successful data.json fetch) over the hard-coded defaults,
+        // so repeat visitors instantly see the latest content instead of an
+        // old placeholder that then "pops" into the real content later.
+        // data.json is still fetched fresh in the background every time, so
+        // any new admin changes always arrive and overwrite this.
+        try {
+            var cached = localStorage.getItem('btLiveDataCache');
+            siteData = cached ? mergeSiteData(JSON.parse(cached)) : JSON.parse(JSON.stringify(defaultData));
+        } catch (err) {
+            siteData = JSON.parse(JSON.stringify(defaultData));
+        }
         renderSite();
         updateCart();
 
@@ -1100,6 +1107,11 @@ img { content-visibility: auto; }
                 renderSite();
                 updateCart();
                 console.info('[B&T Herbal] Live data applied after initial render.');
+                try {
+                    localStorage.setItem('btLiveDataCache', JSON.stringify(loadedData));
+                } catch (err) {
+                    console.warn('[B&T Herbal] Could not cache live data:', err);
+                }
             }
         }).catch(function(err) {
             console.warn('[B&T Herbal] Background data load failed:', err);
